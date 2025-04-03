@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import LoginPage from "../geoport-responder/pages/login"
+import LoginPage from "./pages/login"
 import HomePage from "../geoport-responder/pages/home"
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
