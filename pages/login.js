@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -14,11 +13,13 @@ import Tagline from '../images/Sibya.svg';
 
 export default function LoginPage({ navigation }) {
   const { width, height } = Dimensions.get("window");
-  const { register, handleLogin, setValue, watch } = useForm({ mode: "onChange" });
 
+  // Use form hook to manage form state
+  const { register, handleSubmit, setValue, watch } = useForm({ mode: "onChange" });
+  
   const email = watch("email", "");
   const password = watch("password", "");
-  
+
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isDisabled = !isValidEmail(email) || password.length < 6;
 
@@ -33,21 +34,22 @@ export default function LoginPage({ navigation }) {
     return <Text>Loading...</Text>; 
   }
 
-    async function handleLogin(email,password) {
-     const isloginSuccessful =  await UserController.signinController(email,password)
-        if(isloginSuccessful){
-          navigation.navigate('homepage')
-        }else{
-          return
-        }
+  // The function that handles login, now using handleSubmit
+  const onSubmit = async (data) => {
+    const { email, password } = data;
+    const isloginSuccessful = await UserController.signinController(email, password);
+    if (isloginSuccessful) {
+      navigation.navigate('homepage');
+    } else {
+      // Handle error or login failure
+      alert("Login failed");
     }
-
+  }
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps='handled' showsVerticalScrollIndicator={false}>
-    
         <SafeAreaView style={styles.innerContainer}>
           <View style={styles.logoContainer}>
             <SvgXml xml={Mylogo} width={width * 0.7} height={height * 0.2} />
@@ -63,6 +65,7 @@ export default function LoginPage({ navigation }) {
               placeholderTextColor="#A9A9A9"
               autoCapitalize="none"
               autoCorrect={false}
+              onChangeText={text => setValue("email", text)}  // Registering with react-hook-form
             />
             <Text style={styles.label}>Password</Text>
             <TextInput 
@@ -72,10 +75,15 @@ export default function LoginPage({ navigation }) {
               placeholderTextColor="#A9A9A9"
               autoCapitalize="none"
               autoCorrect={false}
+              onChangeText={text => setValue("password", text)}  // Registering with react-hook-form
             />
           </View>
 
-          <TouchableOpacity style={styles.loginButton} >
+          <TouchableOpacity 
+            style={styles.loginButton} 
+            onPress={handleSubmit(onSubmit)}  // Using handleSubmit to handle form submission
+            disabled={isDisabled}
+          >
             <Text style={styles.loginText}>Login</Text>
           </TouchableOpacity>
 
