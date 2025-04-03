@@ -81,7 +81,7 @@ export default function LoginPage({ navigation }) {
 
           <TouchableOpacity 
             style={styles.loginButton} 
-            onPress={handleSubmit(onSubmit)}  // Using handleSubmit to handle form submission
+            onPress={navigation.navigate("homepage")}  // Using handleSubmit to handle form submission
             disabled={isDisabled}
           >
             <Text style={styles.loginText}>Login</Text>
