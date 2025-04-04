@@ -1,22 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SvgXml } from 'react-native-svg';
-import { onAuthStateChanged } from "firebase/auth";
-import UserController from "../functions/userController"
+import { SvgXml } from 'react-native-svg';  // Only imported once
+import UserController from "../functions/userController";
 import { useFonts, Poppins_600SemiBold, Poppins_700Bold, Poppins_400Regular, Poppins_500Medium } from '@expo-google-fonts/poppins';
 
-import Mylogo from '../images/Geo.svg';
-import Tagline from '../images/Sibya.svg';
+// Correct import paths for SVG files
+import NeoGeo from '../assets/NewGeo.svg';
+import Safekit from '../assets/SafeKit.svg';
+
+
+
+console.log(NeoGeo); // Add this line to see if the import works
+console.log(Safekit); // Add this line to see if the import works
 
 export default function LoginPage({ navigation }) {
   const { width, height } = Dimensions.get("window");
 
-  // Use form hook to manage form state
   const { register, handleSubmit, setValue, watch } = useForm({ mode: "onChange" });
-  
   const email = watch("email", "");
   const password = watch("password", "");
 
@@ -31,20 +34,18 @@ export default function LoginPage({ navigation }) {
   });
 
   if (!fontsLoaded) {
-    return <Text>Loading...</Text>; 
+    return <Text>Loading...</Text>;
   }
 
-  // The function that handles login, now using handleSubmit
   const onSubmit = async (data) => {
     const { email, password } = data;
     const isloginSuccessful = await UserController.signinController(email, password);
     if (isloginSuccessful) {
       navigation.navigate('homepage');
     } else {
-      // Handle error or login failure
       alert("Login failed");
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -52,9 +53,14 @@ export default function LoginPage({ navigation }) {
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps='handled' showsVerticalScrollIndicator={false}>
         <SafeAreaView style={styles.innerContainer}>
           <View style={styles.logoContainer}>
-            <SvgXml xml={Mylogo} width={width * 0.7} height={height * 0.2} />
-            <SvgXml xml={Tagline} width={width * 0.6} height={height * 0.07} style={styles.tagline} />
+            {/* Render SVGs */}
+            <SvgXml xml={NeoGeo} width={width * 2.0} height={height * 30} />
+            <SvgXml xml={Safekit} width={width * 0.6} height={height * 0.07} style={styles.tagline} />
           </View>
+
+
+
+
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email Address</Text>
@@ -65,7 +71,7 @@ export default function LoginPage({ navigation }) {
               placeholderTextColor="#A9A9A9"
               autoCapitalize="none"
               autoCorrect={false}
-              onChangeText={text => setValue("email", text)}  // Registering with react-hook-form
+              onChangeText={text => setValue("email", text)} 
             />
             <Text style={styles.label}>Password</Text>
             <TextInput 
@@ -75,13 +81,13 @@ export default function LoginPage({ navigation }) {
               placeholderTextColor="#A9A9A9"
               autoCapitalize="none"
               autoCorrect={false}
-              onChangeText={text => setValue("password", text)}  // Registering with react-hook-form
+              onChangeText={text => setValue("password", text)} 
             />
           </View>
 
           <TouchableOpacity 
             style={styles.loginButton} 
-            onPress={navigation.navigate("homepage")}  // Using handleSubmit to handle form submission
+            onPress={handleSubmit(onSubmit)}  // Fixed the onPress to use handleSubmit
             disabled={isDisabled}
           >
             <Text style={styles.loginText}>Login</Text>
