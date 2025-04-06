@@ -1,23 +1,21 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView ,Alert} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SvgXml } from 'react-native-svg';  // Only imported once
+import { useEffect,useState } from "react";
 import UserController from "../functions/userController";
 import { useFonts, Poppins_600SemiBold, Poppins_700Bold, Poppins_400Regular, Poppins_500Medium } from '@expo-google-fonts/poppins';
 
 // Correct import paths for SVG files
-import NeoGeo from '../assets/NewGeo.svg';
-import Safekit from '../assets/SafeKit.svg';
+import NeoGeo from '../images/NewGeo.svg';
+import Safekit from '../images/SafeKit.svg';
 
 
-
-console.log(NeoGeo); // Add this line to see if the import works
-console.log(Safekit); // Add this line to see if the import works
 
 export default function LoginPage({ navigation }) {
   const { width, height } = Dimensions.get("window");
+  const loginFunction = new UserController()
 
   const { register, handleSubmit, setValue, watch } = useForm({ mode: "onChange" });
   const email = watch("email", "");
@@ -33,19 +31,27 @@ export default function LoginPage({ navigation }) {
     Poppins_500Medium,
   });
 
-  if (!fontsLoaded) {
-    return <Text>Loading...</Text>;
-  }
+  useEffect(() => {
+    register("email");
+    register("password");
+  }, [register]);
 
   const onSubmit = async (data) => {
-    const { email, password } = data;
-    const isloginSuccessful = await UserController.signinController(email, password);
-    if (isloginSuccessful) {
-      navigation.navigate('homepage');
-    } else {
-      alert("Login failed");
+    try {
+      Alert.alert('running onSubmit');
+      const { email, password } = data;
+      const isloginSuccessful = loginFunction.signinController(email, password);
+      if (isloginSuccessful) {
+        navigation.navigate('homepage');
+      } else {
+        Alert.alert("Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      Alert.alert("An error occurred during login");
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -54,11 +60,9 @@ export default function LoginPage({ navigation }) {
         <SafeAreaView style={styles.innerContainer}>
           <View style={styles.logoContainer}>
             {/* Render SVGs */}
-            <SvgXml xml={NeoGeo} width={width * 2.0} height={height * 30} />
-            <SvgXml xml={Safekit} width={width * 0.6} height={height * 0.07} style={styles.tagline} />
+            <NeoGeo width={width * 0.7} height={height * 0.2} />
+            <Safekit xml={Safekit} width={width * 0.6} height={height * 0.07} style={styles.tagline} />
           </View>
-
-
 
 
 
@@ -86,8 +90,8 @@ export default function LoginPage({ navigation }) {
           </View>
 
           <TouchableOpacity 
-            style={styles.loginButton} 
-            onPress={handleSubmit(onSubmit)}  // Fixed the onPress to use handleSubmit
+            style={isDisabled ? styles.loginButtonDisabled : styles.loginButton}
+            onPress={handleSubmit(onSubmit)}  
             disabled={isDisabled}
           >
             <Text style={styles.loginText}>Login</Text>
@@ -157,6 +161,14 @@ const styles = StyleSheet.create({
     fontSize: 12, 
     textAlign: "center", 
     marginTop: 60, 
+    marginBottom: 20,
+  },loginButtonDisabled: {
+    backgroundColor: "#ccc", 
+    borderRadius: 30,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "97%",
     marginBottom: 20,
   },
 });

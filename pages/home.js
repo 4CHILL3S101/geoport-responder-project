@@ -1,52 +1,94 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions, TextInput, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { Feather } from '@expo/vector-icons'; // If using Expo, or use another icon library
+import { Feather } from '@expo/vector-icons'; 
+import { StatusBar } from 'expo-status-bar';
+import ReportController from '../functions/reportController';
+import { auth } from '../firebaseConfig';   
 
 export default function HomePage() {
-  // Add state for progress status modal and search
+  const fetchFunction = new ReportController();
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState('Change Progress');
+  const [currentStatus, setCurrentStatus] = useState('Select pin to update status');
   const [searchText, setSearchText] = useState('');
-  
-  // Initial map region (you can set this to your desired location)
+  const [isButtonClicked, setIsButtonClicked] = useState(true); // set default as false
+  const [reportData, setReportData] = useState([]);
+  const [selectedStatus, setUpdatedStatus] = useState('');
+  const [reportId, setReportId] = useState('');
   const [region, setRegion] = useState({
-    latitude: 14.5995, // This appears to be near Malaybalay based on your image
-    longitude: 121.0164,
+    latitude: 8.151914, 
+    longitude: 125.128926,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
-  
+
   const statusOptions = [
     'Resolved', 
     'Under Construction', 
     'On-going', 
-    'Pending'
+    'False Report'
   ];
 
-  const handleStatusChange = (status) => {
-    setCurrentStatus(status);
-    setModalVisible(false);
+  const handleStatusChange = (report_id) => {
+    setReportId(report_id); // Set the current report ID
+    setIsButtonClicked(false); // Disable the button while waiting for status update
+    setCurrentStatus(selectedStatus); // Set the current status
   };
+
+  function handleConfirmation(status) {
+    Alert.alert(
+      'Update Report',
+      `Are you sure you want to change the status to ${status}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', onPress: () => handleUpdateReport(reportId, status) },
+      ]
+    );
+  }
+
+  async function handleUpdateReport(reportId, status) {
+    try {
+      await fetchFunction.updateReport(reportId, status);
+      console.log('Report updated successfully!');
+      setIsButtonClicked(true); 
+    } catch (error) {
+      console.error('Error updating report:', error);
+      setIsButtonClicked(true); 
+    }
+  }
+
+  useEffect(() => {
+    const user = auth.currentUser;
+        if (!user) {
+            console.error('User not logged in');
+            return;
+        }
+        const fetchData = async () => {
+          await fetchFunction.fetchReport(setReportData);
+        };
+        fetchData();
+  }, []);
 
   return (
     <View style={styles.container}>
-      {/* Interactive MapView */}
-      <MapView
-        style={styles.map}
-        region={region}
-        onRegionChangeComplete={setRegion}
-      >
-        {/* You can add markers here */}
-        <Marker
-          coordinate={{ latitude: 14.5995, longitude: 121.0164 }}
-          title="Microhotel"
-          description="Location marker"
-        />
+      <StatusBar style="light" hidden={true} />
+
+      <MapView style={styles.map} region={region} onRegionChangeComplete={setRegion}>
+        {reportData.map((report, index) => (
+          <Marker key={index}
+            coordinate={{
+              latitude: parseFloat(report.latitude),
+              longitude: parseFloat(report.longitude)
+            }}
+            pinColor={report.type === 'vehicle collision' ? 'blue' : 'red'}
+            title={report.type}
+            description={report.reporter}
+            onPress={() => {handleStatusChange(report.report_id) , setCurrentStatus(report.status)}}
+          />
+        ))}
       </MapView>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      <View style={styles.searchContainer}> 
         <View style={styles.searchBox}>
           <Feather name="search" size={20} color="#999" style={styles.searchIcon} />
           <TextInput
@@ -59,15 +101,16 @@ export default function HomePage() {
         </View>
       </View>
 
-      {/* Change Progress Button */}
       <TouchableOpacity 
-        style={styles.progressButton}
-        onPress={() => setModalVisible(true)}
+        style={[styles.progressButton, { backgroundColor: isButtonClicked ? '#9AA6B2' : '#FF8D3F' }]}  
+        disabled={isButtonClicked}
+        onPress={() => {
+          setModalVisible(true); 
+        }}
       >
         <Text style={styles.buttonText}>{currentStatus}</Text>
       </TouchableOpacity>
-      
-      {/* Modal for status options */}
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -82,12 +125,16 @@ export default function HomePage() {
               <TouchableOpacity
                 key={index}
                 style={styles.optionButton}
-                onPress={() => handleStatusChange(option)}
+                onPress={() => {
+                  setUpdatedStatus(option); 
+                  setModalVisible(false); 
+                  handleConfirmation(option); 
+                }}
               >
                 <Text style={styles.optionText}>{option}</Text>
               </TouchableOpacity>
             ))}
-            
+
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setModalVisible(false)}
@@ -110,7 +157,6 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   },
-  // Search bar styles
   searchContainer: {
     position: 'absolute',
     top: 40,
@@ -144,9 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  // Styles for the progress button and modal
   progressButton: {
-    backgroundColor: '#FF8D3F',
     padding: 15,
     borderRadius: 8,
     position: 'absolute',
@@ -173,7 +217,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
