@@ -1,6 +1,6 @@
 import { auth } from '../firebaseConfig';
 import { signInWithEmailAndPassword, getAuth, signOut } from "firebase/auth";
-
+import {SERVER_IP,SERVER_PORT,CHECK_USER_VALIDITY} from "@env"
 
 export default class UserController{
 
@@ -10,6 +10,27 @@ export default class UserController{
         const isAccountValid =  await signInWithEmailAndPassword(auth, email, password)
         return isAccountValid.user
     }
+
+  async checkResponderValidity(){
+      try{
+           let url = `http://${SERVER_IP}:${SERVER_PORT}/${CHECK_USER_VALIDITY}`
+          const isAccountValid = await axios.post(url,data,{
+            headers: {
+              "Content-Type": "application/json",
+            }
+          })
+
+          if(isAccountValid.status === 200){
+              return true
+          }else{
+            return false
+          }
+
+      }catch(error){
+        
+      }
+  }
+
 
   async  signoutController(){
             const auth = getAuth();

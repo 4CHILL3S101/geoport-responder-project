@@ -1,0 +1,9 @@
+
+#response type
+1. Solved
+2. Under Construction (for road defects)
+3. False Report
+4. On going (for collisions)
+
+
+#THE EMAIL IN UPDATING REPORT NEEDED TO BE UPDATED

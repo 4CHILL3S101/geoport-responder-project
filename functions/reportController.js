@@ -19,7 +19,6 @@ export default class ReportController {
 
             let token = await user.getIdToken();
             const url = `ws://${SERVER_IP}:${SERVER_PORT}/${FETCH_REPORTS_ROUTES}?token=${token}`;
-            console.log("WebSocket URL:", url);
 
             if (!socket || socket.readyState === WebSocket.CLOSED) {
                 socket = new WebSocket(url);
@@ -32,7 +31,6 @@ export default class ReportController {
                     try {
                         const data = JSON.parse(event.data);
                         let filteredData = this.filterReports(data);
-                        console.log("Filtered Data:", filteredData);
                         setReportData(filteredData);
                     } catch (error) {
                         console.error("Error parsing WebSocket data:", error);
@@ -54,32 +52,38 @@ export default class ReportController {
     }
 
 
-   async updateReport(report_id,status){
-        try{
-
-            if(status === "Resolved"){
-                status = "Solved";
-            }
-            
-            const data = { report_id,  status};
-            console.log(status);
-            let url = `http://${SERVER_IP}:${SERVER_PORT}/${UPDATE_REPORT}`
-            const response = await axios.patch(url, {
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(data),  
-            });
-        
-            if (!response.ok) {
-              throw new Error('Cannot delete report');
-            }
-        
-            return 'Successful deletion of report';
-        }catch(error){
-            console.error("Error in updateReport:", error);
+    async updateReport(report_id, status) {
+        try {
+          if (status === "Resolved") {
+            status = "Solved";
+          }
+      
+          const data = { report_id, status };
+          console.log("The data being sent is ", data);
+      
+          let url = `http://${SERVER_IP}:${SERVER_PORT}/${UPDATE_REPORT}`;
+          const response = await axios.patch(url, data, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+      
+          if (response.status === 200) {
+            return "Successful update of report";
+          }else{
+            return ("Failed to update report");
+          }
+      
+          
+        } catch (error) {
+            console.error("Error in updateReport:");
+            console.error("Status:", error.response?.status);
+            console.error("Data:", error.response?.data);
+            console.error("Message:", error.message);
+          console.error("Error in updateReport:", error.response?.data || error.message);
         }
-    }
+      }
+      
 
 
 

@@ -15,6 +15,7 @@ export default function HomePage() {
   const [reportData, setReportData] = useState([]);
   const [selectedStatus, setUpdatedStatus] = useState('');
   const [reportId, setReportId] = useState('');
+  const [selectedReportType, setSelectedReportType] = useState('')
   const [region, setRegion] = useState({
     latitude: 8.151914, 
     longitude: 125.128926,
@@ -22,18 +23,33 @@ export default function HomePage() {
     longitudeDelta: 0.0421,
   });
 
-  const statusOptions = [
+  const RoadDefectstatusOptions = [
     'Resolved', 
     'Under Construction', 
-    'On-going', 
     'False Report'
   ];
 
+
+  const RoadCollisionstatusOptions = [
+    'Resolved', 
+    'On going', 
+    'False Report'
+  ]
+
   const handleStatusChange = (report_id) => {
-    setReportId(report_id); // Set the current report ID
-    setIsButtonClicked(false); // Disable the button while waiting for status update
-    setCurrentStatus(selectedStatus); // Set the current status
+    setReportId(report_id); 
+    setIsButtonClicked(false); 
+    setCurrentStatus(selectedStatus); 
   };
+
+  const getStatusOptions = (type) => {
+    if (type === 'road defects') {
+      return RoadDefectstatusOptions;
+    } else {
+      return RoadCollisionstatusOptions;
+    }
+  };
+  
 
   function handleConfirmation(status) {
     Alert.alert(
@@ -82,8 +98,8 @@ export default function HomePage() {
             }}
             pinColor={report.type === 'vehicle collision' ? 'blue' : 'red'}
             title={report.type}
-            description={report.reporter}
-            onPress={() => {handleStatusChange(report.report_id) , setCurrentStatus(report.status)}}
+            description={report.status}
+            onPress={() => {handleStatusChange(report.report_id) , setCurrentStatus(report.status) ,   setSelectedReportType(report.type);}}
           />
         ))}
       </MapView>
@@ -121,7 +137,7 @@ export default function HomePage() {
           <View style={styles.modalView}>
             <Text style={styles.modalTitle}>Select Status</Text>
             
-            {statusOptions.map((option, index) => (
+            {getStatusOptions(selectedReportType).map((option, index) => (
               <TouchableOpacity
                 key={index}
                 style={styles.optionButton}
