@@ -9,6 +9,7 @@ import { auth } from '../firebaseConfig';
 export default function HomePage() {
   const fetchFunction = new ReportController();
   const [modalVisible, setModalVisible] = useState(false);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [currentStatus, setCurrentStatus] = useState('Select pin to update status');
   const [searchText, setSearchText] = useState('');
   const [isButtonClicked, setIsButtonClicked] = useState(true); // set default as false
@@ -50,6 +51,20 @@ export default function HomePage() {
     }
   };
   
+  const handleLogout = () => {
+    setLogoutModalVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    try {
+      await auth.signOut();
+      console.log('User logged out successfully');
+      // Handle navigation to login screen if needed
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+    setLogoutModalVisible(false);
+  };
 
   function handleConfirmation(status) {
     Alert.alert(
@@ -117,16 +132,26 @@ export default function HomePage() {
         </View>
       </View>
 
-      <TouchableOpacity 
-        style={[styles.progressButton, { backgroundColor: isButtonClicked ? '#9AA6B2' : '#FF8D3F' }]}  
-        disabled={isButtonClicked}
-        onPress={() => {
-          setModalVisible(true); 
-        }}
-      >
-        <Text style={styles.buttonText}>{currentStatus}</Text>
-      </TouchableOpacity>
+      <View style={styles.bottomButtonsContainer}>
+        <TouchableOpacity 
+          style={[styles.progressButton, { backgroundColor: isButtonClicked ? '#9AA6B2' : '#FF8D3F' }]}  
+          disabled={isButtonClicked}
+          onPress={() => {
+            setModalVisible(true); 
+          }}
+        >
+          <Text style={styles.buttonText}>{currentStatus}</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.logoutButton}
+          onPress={handleLogout}
+        >
+          <Feather name="log-out" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
 
+      {/* Status Update Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -157,6 +182,36 @@ export default function HomePage() {
             >
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={logoutModalVisible}
+        onRequestClose={() => setLogoutModalVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.logoutModalView}>
+            <Text style={styles.logoutModalText}>Are you sure you want to log out?</Text>
+            
+            <View style={styles.logoutButtonsContainer}>
+              <TouchableOpacity
+                style={styles.logoutModalButton}
+                onPress={confirmLogout}
+              >
+                <Text style={styles.logoutModalButtonText}>Yes</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.logoutModalButton}
+                onPress={() => setLogoutModalVisible(false)}
+              >
+                <Text style={styles.logoutModalButtonText}>No</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -206,14 +261,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
+  bottomButtonsContainer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   progressButton: {
     padding: 15,
     borderRadius: 8,
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
+    flex: 1,
+    marginRight: 10,
     alignItems: 'center',
+  },
+  logoutButton: {
+    backgroundColor: '#FF8D3F',
+    padding: 15,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 56,
+    height: 56,
   },
   buttonText: {
     color: 'white',
@@ -222,14 +293,16 @@ const styles = StyleSheet.create({
   },
   centeredView: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center', // Change from 'flex-end' to 'center'
+    alignItems: 'center', // Add this to center horizontally
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20, // Change from borderTopLeftRadius/borderTopRightRadius to borderRadius
     padding: 20,
+    width: '80%', // Add this to control the width
+    maxWidth: 400, // Optional: prevent it from being too wide on larger screens
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -264,5 +337,45 @@ const styles = StyleSheet.create({
   cancelText: {
     fontFamily: 'Poppins-Medium',
     color: '#FF8D3F',
+  },
+  // Logout modal styles
+  logoutModalView: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    margin: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  logoutModalText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  logoutButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  logoutModalButton: {
+    flex: 1,
+    backgroundColor: '#FF8D3F',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    margin: 5,
+  },
+  logoutModalButtonText: {
+    fontFamily: 'Poppins-Medium',
+    color: 'white',
+    fontSize: 16,
   }
 });

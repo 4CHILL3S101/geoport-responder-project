@@ -60,8 +60,9 @@ export default function LoginPage({ navigation }) {
         <SafeAreaView style={styles.innerContainer}>
           <View style={styles.logoContainer}>
             {/* Render SVGs */}
+            <Safekit xml={Safekit} width={width * 0.9} height={height * 0.13} style={styles.tagline} />
             <NeoGeo width={width * 0.7} height={height * 0.2} />
-            <Safekit xml={Safekit} width={width * 0.6} height={height * 0.07} style={styles.tagline} />
+            
           </View>
 
 
@@ -94,7 +95,7 @@ export default function LoginPage({ navigation }) {
             onPress={handleSubmit(onSubmit)}  
             disabled={isDisabled}
           >
-            <Text style={styles.loginText}>Login</Text>
+            <Text style={styles.loginText}>login</Text>
           </TouchableOpacity>
 
         </SafeAreaView>
@@ -122,12 +123,16 @@ const styles = StyleSheet.create({
     justifyContent: "center", 
     marginBottom: 50 
   },
-  tagline: { marginTop: -5 },
+  tagline: 
+  { marginTop: -20, 
+    marginLeft: 170,
+
+  },
   inputContainer: { width: "97%" },
   label: { 
     fontFamily: 'Poppins_500Medium', 
     color: "gray", 
-    marginBottom: 5 
+    marginBottom: 10
   },
   input: {
     backgroundColor: "#FDFDFD",
