@@ -11,7 +11,7 @@ export default class ReportController {
     async fetchReport(setReportData) {
         let socket = null;
         try {
-            const user = auth.currentUser;
+            const user =  auth.currentUser;
             if (!user) {
                 console.error('User not logged in');
                 return;

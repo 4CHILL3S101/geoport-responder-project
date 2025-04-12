@@ -58,8 +58,8 @@ export default function HomePage() {
   const confirmLogout = async () => {
     try {
       await auth.signOut();
-      console.log('User logged out successfully');
-      // Handle navigation to login screen if needed
+      Alert.alert('Logout successful!');
+      navigation.navigate('Loginpage');
     } catch (error) {
       console.error('Error logging out:', error);
     }
