@@ -38,19 +38,20 @@ export default function LoginPage({ navigation }) {
 
   const onSubmit = async (data) => {
     try {
-      Alert.alert('running onSubmit');
       const { email, password } = data;
-      const isloginSuccessful = loginFunction.signinController(email, password);
-      if (isloginSuccessful) {
+      const isLoginSuccessful = await loginFunction.signinController(email, password);
+  
+      if (isLoginSuccessful.successful) {
         navigation.navigate('homepage');
       } else {
-        Alert.alert("Login failed");
+        Alert.alert("Login failed", isLoginSuccessful.error);
       }
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("An error occurred during login");
     }
   };
+  
   
 
   return (

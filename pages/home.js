@@ -5,18 +5,22 @@ import { Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import ReportController from '../functions/reportController';
 import { auth } from '../firebaseConfig';   
+import DisplayModal from  "../utils/modals"
 
 export default function HomePage() {
   const fetchFunction = new ReportController();
   const [modalVisible, setModalVisible] = useState(false);
+  const [passableModal,setPassableModal] = useState(false)
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [currentStatus, setCurrentStatus] = useState('Select pin to update status');
   const [searchText, setSearchText] = useState('');
-  const [isButtonClicked, setIsButtonClicked] = useState(true); // set default as false
+  const [isButtonClicked, setIsButtonClicked] = useState(true); 
   const [reportData, setReportData] = useState([]);
   const [selectedStatus, setUpdatedStatus] = useState('');
   const [reportId, setReportId] = useState('');
   const [selectedReportType, setSelectedReportType] = useState('')
+  const [showPassable,setShowPassableModal] = useState(false)
+
   const [region, setRegion] = useState({
     latitude: 8.151914, 
     longitude: 125.128926,
@@ -72,26 +76,27 @@ export default function HomePage() {
       `Are you sure you want to change the status to ${status}?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: () => handleUpdateReport(reportId, status) },
+        { text: 'OK', onPress: () =>setPassableModal(true) },
       ]
     );
   }
 
-  async function handleUpdateReport(reportId, status) {
+  async function handleUpdateReport(reportId, status,value) {
     try {
-      await fetchFunction.updateReport(reportId, status);
-      console.log('Report updated successfully!');
-      setIsButtonClicked(true); 
+      await fetchFunction.updateReport(reportId, status,value);
+      setIsButtonClicked(true);
+      Alert('Success',"Report successfully updated") 
     } catch (error) {
-      console.error('Error updating report:', error);
+     Alert('Error updating report:', error);
       setIsButtonClicked(true); 
+    }finally{
+      setPassableModal(false)
     }
   }
 
-  useEffect(() => {
+  useEffect(() => { 
     const user = auth.currentUser;
         if (!user) {
-            console.error('User not logged in');
             return;
         }
         const fetchData = async () => {
@@ -99,6 +104,9 @@ export default function HomePage() {
         };
         fetchData();
   }, []);
+
+
+
 
   return (
     <View style={styles.container}>
@@ -186,7 +194,13 @@ export default function HomePage() {
         </View>
       </Modal>
 
-      {/* Logout Confirmation Modal */}
+
+      <DisplayModal
+        visible={passableModal}
+        mode="passable"
+        onResponse={(value) => handleUpdateReport(reportId, selectedStatus,value) }
+      />
+
       <Modal
         animationType="slide"
         transparent={true}

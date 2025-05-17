@@ -1,5 +1,7 @@
 import {FETCH_REPORTS_ROUTES,SERVER_IP,SERVER_PORT,UPDATE_REPORT} from "@env"
-import { auth } from '../firebaseConfig';    
+import authapi from "../utils/auth/authapi"  
+import noauthapi from "../utils/noauth/noauthapi";
+import {auth} from "../firebaseConfig"
 import axios  from 'axios';
 
 
@@ -52,28 +54,32 @@ export default class ReportController {
     }
 
 
-    async updateReport(report_id, status) {
+    async updateReport(report_id, status,value) {
         try {
           if (status === "Resolved") {
             status = "Solved";
           }
-      
-          const data = { report_id, status };
-          console.log("The data being sent is ", data);
-      
-          let url = `http://${SERVER_IP}:${SERVER_PORT}/${UPDATE_REPORT}`;
-          const response = await axios.patch(url, data, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-      
+
+          let user = auth.currentUser;
+          if(!user){
+            console.error('user not logged in')
+            return
+          }
+          let id = user.uid
+
+          const data = { report_id, status ,value};
+          let url = `${UPDATE_REPORT}/${id}`
+            console.log("User ID:", id);
+            console.log("Request URL:", url);
+            console.log("Payload:", data);
+
+          const response = await authapi.patch(url, data);
+    
           if (response.status === 200) {
             return "Successful update of report";
           }else{
             return ("Failed to update report");
           }
-      
           
         } catch (error) {
             console.error("Error in updateReport:");

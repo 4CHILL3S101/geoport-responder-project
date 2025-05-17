@@ -3,11 +3,27 @@ import { signInWithEmailAndPassword, getAuth, signOut } from "firebase/auth";
 import {SERVER_IP,SERVER_PORT,CHECK_USER_VALIDITY} from "@env"
 
 export default class UserController{
-
-  async signinController(email,password){
-        const isAccountValid =  await signInWithEmailAndPassword(auth, email, password)
-        return isAccountValid.user
+  
+  async signinController(email, password) {
+    const firebaseErrorMessages = {
+      "auth/user-not-found": "No account found with this email.",
+      "auth/wrong-password": "Incorrect password. Please try again.",
+      "auth/invalid-email": "Please enter a valid email address.",
+      "auth/user-disabled": "Your account has been disabled. Please contact support.",
+      "auth/too-many-requests": "Too many failed attempts. Try again later.",
+      "auth/network-request-failed": "Network error. Please check your internet connection.",
+    };    
+    
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return { successful: true };
+    } catch (error) {
+      const customMessage = firebaseErrorMessages[error.code] || "An unexpected error occurred.";
+      return { successful: false, error: customMessage };
     }
+  }
+  
+  
 
   async checkResponderValidity(){
       try{
@@ -23,9 +39,8 @@ export default class UserController{
           }else{
             return false
           }
-
       }catch(error){
-        
+        console.error(error)
       }
   }
 
