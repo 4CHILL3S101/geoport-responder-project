@@ -1,35 +1,31 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView ,Alert} from 'react-native';
+import { Dimensions, StyleSheet,ActivityIndicator, Text, TextInput, TouchableOpacity, View, ScrollView ,Alert} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect,useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import UserController from "../functions/userController";
 import { useFonts, Poppins_600SemiBold, Poppins_700Bold, Poppins_400Regular, Poppins_500Medium } from '@expo-google-fonts/poppins';
 
-// Correct import paths for SVG files
+
 import NeoGeo from '../images/NewGeo.svg';
 import Safekit from '../images/SafeKit.svg';
 
 
 
-export default function LoginPage({ navigation }) {
+export default function LoginPage() {
   const { width, height } = Dimensions.get("window");
   const loginFunction = new UserController()
-
-  const { register, handleSubmit, setValue, watch } = useForm({ mode: "onChange" });
+  const [loading,setLoading] = useState(false)
+  const navigation = useNavigation();
+  const { register, handleSubmit, setValue, watch,reset } = useForm({ mode: "onChange" });
   const email = watch("email", "");
   const password = watch("password", "");
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isDisabled = !isValidEmail(email) || password.length < 6;
 
-  const [fontsLoaded] = useFonts({
-    Poppins_600SemiBold,
-    Poppins_700Bold,
-    Poppins_400Regular,
-    Poppins_500Medium,
-  });
 
   useEffect(() => {
     register("email");
@@ -37,18 +33,21 @@ export default function LoginPage({ navigation }) {
   }, [register]);
 
   const onSubmit = async (data) => {
+    setLoading(true)
     try {
       const { email, password } = data;
       const isLoginSuccessful = await loginFunction.signinController(email, password);
   
-      if (isLoginSuccessful.successful) {
+      if(isLoginSuccessful.successful) {
         navigation.navigate('homepage');
       } else {
         Alert.alert("Login failed", isLoginSuccessful.error);
       }
     } catch (error) {
-      console.error("Login error:", error);
-      Alert.alert("An error occurred during login");
+      Alert.alert("Something went wrong","An error occurred during login");
+    }finally{
+      reset(); 
+      setLoading(false)
     }
   };
   
@@ -77,6 +76,7 @@ export default function LoginPage({ navigation }) {
               placeholderTextColor="#A9A9A9"
               autoCapitalize="none"
               autoCorrect={false}
+              value={email}
               onChangeText={text => setValue("email", text)} 
             />
             <Text style={styles.label}>Password</Text>
@@ -87,16 +87,17 @@ export default function LoginPage({ navigation }) {
               placeholderTextColor="#A9A9A9"
               autoCapitalize="none"
               autoCorrect={false}
+              value={password}
               onChangeText={text => setValue("password", text)} 
             />
           </View>
 
           <TouchableOpacity 
-            style={isDisabled ? styles.loginButtonDisabled : styles.loginButton}
+            style={isDisabled ||  loading ? styles.loginButtonDisabled : styles.loginButton}
             onPress={handleSubmit(onSubmit)}  
-            disabled={isDisabled}
+            disabled={isDisabled || loading}
           >
-            <Text style={styles.loginText}>login</Text>
+            <Text style={styles.loginText}>{loading? <ActivityIndicator size="small" color="white" /> : "Login" }</Text>
           </TouchableOpacity>
 
         </SafeAreaView>

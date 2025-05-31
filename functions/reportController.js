@@ -54,7 +54,7 @@ export default class ReportController {
     }
 
 
-    async updateReport(report_id, status,value) {
+    async updateReport(report_id, status,value,currentVersion) {
         try {
           if (status === "Resolved") {
             status = "Solved";
@@ -67,10 +67,8 @@ export default class ReportController {
           }
           let id = user.uid
 
-          const data = { report_id, status ,value};
+          const data = { report_id, status ,value,currentVersion};
           let url = `${UPDATE_REPORT}/${id}`
-            console.log("User ID:", id);
-            console.log("Request URL:", url);
             console.log("Payload:", data);
 
           const response = await authapi.patch(url, data);

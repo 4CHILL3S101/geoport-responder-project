@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions, TextInput, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import { useNavigation } from "@react-navigation/native";
 import { Feather } from '@expo/vector-icons'; 
 import { StatusBar } from 'expo-status-bar';
 import ReportController from '../functions/reportController';
@@ -9,6 +10,7 @@ import DisplayModal from  "../utils/modals"
 
 export default function HomePage() {
   const fetchFunction = new ReportController();
+  const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [passableModal,setPassableModal] = useState(false)
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
@@ -17,6 +19,7 @@ export default function HomePage() {
   const [isButtonClicked, setIsButtonClicked] = useState(true); 
   const [reportData, setReportData] = useState([]);
   const [selectedStatus, setUpdatedStatus] = useState('');
+  const [currentVersion,seCurrentVersion] = useState('')
   const [reportId, setReportId] = useState('');
   const [selectedReportType, setSelectedReportType] = useState('')
   const [showPassable,setShowPassableModal] = useState(false)
@@ -81,9 +84,9 @@ export default function HomePage() {
     );
   }
 
-  async function handleUpdateReport(reportId, status,value) {
+  async function handleUpdateReport(reportId, status,value,currentVersion) {
     try {
-      await fetchFunction.updateReport(reportId, status,value);
+      await fetchFunction.updateReport(reportId, status,value,currentVersion);
       setIsButtonClicked(true);
       Alert('Success',"Report successfully updated") 
     } catch (error) {
@@ -122,7 +125,7 @@ export default function HomePage() {
             pinColor={report.type === 'vehicle collision' ? 'blue' : 'red'}
             title={report.type}
             description={report.status}
-            onPress={() => {handleStatusChange(report.report_id) , setCurrentStatus(report.status) ,   setSelectedReportType(report.type);}}
+            onPress={() => {handleStatusChange(report.report_id) , setCurrentStatus(report.status) ,   setSelectedReportType(report.type);seCurrentVersion(report.version)}}
           />
         ))}
       </MapView>
