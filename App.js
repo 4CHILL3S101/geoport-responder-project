@@ -1,21 +1,48 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import LoginPage from "./pages/login"
-import HomePage from "./pages/home"
-import RedirectPage from "./pages/redirect"
+import { StyleSheet, Text, View } from "react-native";
+import LoginPage from "./pages/login";
+import HomePage from "./pages/home";
+import RedirectPage from "./pages/redirect";
+import NetInfo from "@react-native-community/netinfo";
+import React, { useEffect, useState } from "react";
+import NoInternetModal from "./utils/noInternetModal";
 
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
 const Stack = createStackNavigator();
 export default function App() {
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      console.log("NetInfo state:", state);
+      setIsConnected(state.isInternetReachable ?? state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Redirect">
-        <Stack.Screen name="Redirect" component={RedirectPage} options={{ headerShown: false }} />
-        <Stack.Screen name="Loginpage" component={LoginPage} options={{ headerShown: false }} />
-        <Stack.Screen name="homepage" component={HomePage} options={{ headerShown: false }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <NoInternetModal visible={!isConnected} />
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Redirect">
+          <Stack.Screen
+            name="Redirect"
+            component={RedirectPage}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Loginpage"
+            component={LoginPage}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="homepage"
+            component={HomePage}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 }
