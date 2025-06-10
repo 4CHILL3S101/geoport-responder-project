@@ -261,30 +261,44 @@ export default function HomePage() {
       />
 
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={logoutModalVisible}
         onRequestClose={() => setLogoutModalVisible(false)}
       >
         <View style={styles.centeredView}>
-          <View style={styles.logoutModalView}>
-            <Text style={styles.logoutModalText}>
+          <View style={styles.logoutModal}>
+            <Feather
+              name="alert-circle"
+              size={48}
+              color="#FF8D3F"
+              style={{ marginBottom: 15 }}
+            />
+            <Text style={styles.logoutTitle}>Log Out</Text>
+            <Text style={styles.logoutMessage}>
               Are you sure you want to log out?
             </Text>
 
-            <View style={styles.logoutButtonsContainer}>
+            <View style={styles.logoutActions}>
               <TouchableOpacity
-                style={styles.logoutModalButton}
+                style={[
+                  styles.logoutButtonStyled,
+                  { backgroundColor: "#FF8D3F" },
+                ]}
                 onPress={confirmLogout}
               >
-                <Text style={styles.logoutModalButtonText}>Yes</Text>
+                <Text style={styles.logoutButtonText}>Yes, Log Out</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
-                style={styles.logoutModalButton}
+                style={[
+                  styles.logoutButtonStyled,
+                  { backgroundColor: "#E5E5E5" },
+                ]}
                 onPress={() => setLogoutModalVisible(false)}
               >
-                <Text style={styles.logoutModalButtonText}>No</Text>
+                <Text style={[styles.logoutButtonText, { color: "#333" }]}>
+                  Cancel
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -385,6 +399,52 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: "center",
   },
+  logoutModal: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 25,
+    alignItems: "center",
+    width: "85%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+
+  logoutTitle: {
+    fontSize: 20,
+    fontFamily: "Poppins-SemiBold",
+    color: "#333",
+    marginBottom: 8,
+  },
+
+  logoutMessage: {
+    fontSize: 16,
+    fontFamily: "Poppins-Regular",
+    textAlign: "center",
+    color: "#555",
+    marginBottom: 25,
+  },
+
+  logoutActions: {
+    width: "100%",
+    flexDirection: "column",
+    gap: 10,
+  },
+
+  logoutButtonStyled: {
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  logoutButtonText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Medium",
+    color: "#fff",
+  },
+
   optionButton: {
     padding: 15,
     borderBottomWidth: 1,

@@ -75,7 +75,6 @@ export default class ReportController {
 
       const data = { report_id, status, value, currentVersion };
       let url = `${UPDATE_REPORT}/${id}`;
-      console.log("Update Report Data:", data);
       const response = await authapi.patch(url, data);
 
       if (response.status === 200) {
