@@ -26,6 +26,7 @@ export default function HomePage() {
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [responseModalStatus, setResponseModalStatus] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
+  const [refresh, setRefresh] = useState(false);
   const [responseModalVisibility, setResponseModalVisibility] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(
     "Select pin to update status"
@@ -92,33 +93,46 @@ export default function HomePage() {
         {
           text: "OK",
           onPress: () => {
+            setUpdatedStatus(status);
             setPassableModal(true);
-            setUpdatedStatus(status); // still for UI
           },
         },
       ]
     );
   }
 
-  async function handleUpdateReport(report_id, status, value, currentVersion) {
+  async function handleUpdateReport(
+    report_id,
+    currentStatus,
+    value,
+    currentVersion
+  ) {
     try {
       setIsUpdating(true);
       await fetchFunction.updateReport({
         report_id,
-        status,
+        currentStatus,
         value,
         currentVersion,
         setResponseModalStatus,
         setResponseMessage,
       });
+      setReportData((prevData) =>
+        prevData.map((report) =>
+          report.report_id === report_id
+            ? { ...report, status: currentStatus }
+            : report
+        )
+      );
     } catch (error) {
       setResponseModalStatus(true);
       setResponseMessage(error);
     } finally {
-      setResponseModalVisibility(true);
-      setIsButtonClicked(true);
+      setResponseModalVisibility(!responseModalVisibility);
+      setIsButtonClicked(!isButtonClicked);
       setIsUpdating(false);
       setPassableModal(false);
+      setRefresh(!refresh);
     }
   }
 
@@ -131,7 +145,7 @@ export default function HomePage() {
       await fetchFunction.fetchReport(setReportData);
     };
     fetchData();
-  }, []);
+  }, [refresh]);
 
   return (
     <View style={styles.container}>
@@ -235,7 +249,7 @@ export default function HomePage() {
         mode="passable"
         clicked={isUpdating}
         onResponse={(value) => {
-          handleUpdateReport(report_id, currentStatus, value, currentVersion);
+          handleUpdateReport(report_id, selectedStatus, value, currentVersion);
         }}
       />
 

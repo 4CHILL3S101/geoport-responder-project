@@ -18,7 +18,7 @@ export default function NoInternetModal({ visible }) {
 
           <Text style={styles.message}>
             It looks like you're offline. Please check your Wi-Fi or mobile data
-            to reconnect and continue using the app smoothly.
+            to reconnect and continue using the app.
           </Text>
         </View>
       </View>

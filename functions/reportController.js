@@ -54,12 +54,13 @@ export default class ReportController {
 
   async updateReport({
     report_id,
-    status,
+    currentStatus,
     value,
     currentVersion,
     setResponseModalStatus,
     setResponseMessage,
   }) {
+    let status = currentStatus;
     try {
       if (status === "Resolved") {
         status = "Solved";
@@ -74,7 +75,7 @@ export default class ReportController {
 
       const data = { report_id, status, value, currentVersion };
       let url = `${UPDATE_REPORT}/${id}`;
-
+      console.log("Update Report Data:", data);
       const response = await authapi.patch(url, data);
 
       if (response.status === 200) {
