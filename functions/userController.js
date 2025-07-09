@@ -1,7 +1,7 @@
-import { auth } from "../firebaseConfig";
+
 import noauthapi from "../utils/noauth/noauthapi";
 import { signInWithEmailAndPassword, getAuth, signOut } from "firebase/auth";
-import { SERVER_IP, SERVER_PORT, CHECK_USER_VALIDITY } from "@env";
+import {  CHECK_USER_VALIDITY } from "@env";
 
 export default class UserController {
   async signinController(email, password) {

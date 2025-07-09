@@ -8,7 +8,6 @@ import {
   Dimensions,
   Alert,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
@@ -16,11 +15,16 @@ import ReportController from "../functions/reportController";
 import { auth } from "../firebaseConfig";
 import DisplayModal from "../utils/modals";
 import DisplayResponseModal from "../utils/responseModal";
+import MapboxGL from '@rnmapbox/maps';
+import {MAPBOX_API} from '@env';
+import LoadingModal from "../utils/loadingModal"
 import { set } from "react-hook-form";
 
+MapboxGL.setAccessToken(MAPBOX_API);
 export default function HomePage() {
   const fetchFunction = new ReportController();
   const navigation = useNavigation();
+  const [data, setData] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [passableModal, setPassableModal] = useState(false);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
@@ -137,46 +141,78 @@ export default function HomePage() {
   }
 
   useEffect(() => {
+    setData(true)
     const user = auth.currentUser;
     if (!user) {
       return;
     }
     const fetchData = async () => {
       await fetchFunction.fetchReport(setReportData);
+     setData(true);
     };
+
     fetchData();
   }, [refresh]);
 
   return (
     <View style={styles.container}>
       <StatusBar style="light" hidden={true} />
+      {reportData.length > 1 ? (
+         <MapboxGL.MapView
+      style={styles.map}
+      styleURL={MapboxGL.StyleURL.Street}
+    onCameraChanged={(e) => {
+      const coords = e.centerCoordinate;
+      if (coords) {
+        setRegion({
+          ...region,
+          latitude: coords[1],
+          longitude: coords[0],
+        });
+      }
+    }}
 
-      <MapView
-        style={styles.map}
-        region={region}
-        onRegionChangeComplete={setRegion}
-      >
-        {reportData.map((report) => (
-          <Marker
-            key={report.report_id}
-            coordinate={{
-              latitude: parseFloat(report.latitude),
-              longitude: parseFloat(report.longitude),
-            }}
-            pinColor={report.type === "vehicle collision" ? "red" : "yellow"}
-            title={report.type}
-            description={report.status}
-            onPress={() => {
-              handleStatusChange(report.report_id);
-              setCurrentStatus(report.status);
-              setReportId(report.report_id);
-              setSelectedReportType(report.type);
-              setCurrentVersion(report.version);
+    >
+      <MapboxGL.Camera
+        centerCoordinate={[region.longitude, region.latitude]}
+        zoomLevel={11}
+      />
+
+      {reportData.map((report) => (
+        <MapboxGL.PointAnnotation
+          key={report.report_id}
+          id={report.report_id.toString()}
+          coordinate={[parseFloat(report.longitude), parseFloat(report.latitude)]}
+        onSelected={() => {
+        setIsButtonClicked(false);
+        setCurrentStatus(report.status);
+        setReportId(report.report_id);
+        setSelectedReportType(report.type);
+        setCurrentVersion(report.version);
+      }}
+
+        >
+          <View
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: 10,
+              backgroundColor:
+                report.type === 'vehicle collision' ? 'red' : 'yellow',
+              borderWidth: 2,
+              borderColor: '#fff',
             }}
           />
-        ))}
-      </MapView>
-
+        </MapboxGL.PointAnnotation>
+      ))}
+        </MapboxGL.MapView>
+      ) : (
+         <LoadingModal open={data}/>
+         )}
+    
+      
+       
+    
       <View style={styles.searchContainer}>
         <View style={styles.searchBox}>
           <View style={styles.legendItem}>
@@ -314,9 +350,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   map: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
-  },
+  flex: 1,
+},
   searchContainer: {
     position: "absolute",
     alignItems: "center",
