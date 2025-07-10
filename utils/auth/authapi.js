@@ -1,9 +1,9 @@
 import axios from "axios";
-import { SERVER_PORT, SERVER_IP } from "@env";
+import { SERVER_PORT, SERVER_IP,SERVER_URL } from "@env";
 import { auth } from "../../firebaseConfig"
 
 export default api = axios.create({
-  baseURL: `http://${SERVER_IP}:${SERVER_PORT}`,
+  baseURL: `${SERVER_URL}`,
   headers: {
     "Content-Type": "application/json",
   },
