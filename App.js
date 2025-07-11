@@ -13,13 +13,23 @@ const Stack = createStackNavigator();
 export default function App() {
   const [isConnected, setIsConnected] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      console.log("NetInfo state:", state);
-      setIsConnected(state.isInternetReachable ?? state.isConnected);
-    });
-    return () => unsubscribe();
-  }, []);
+ useEffect(() => {
+  const unsubscribe = NetInfo.addEventListener((state) => {
+    console.log("NetInfo state:", state);
+
+    const reachable =
+      state.isInternetReachable ??
+      (state.isConnected && state.type !== 'none');
+
+    const isProbablyOnline =
+      reachable || state.type === 'vpn' || state.type === 'cellular';
+
+    setIsConnected(isProbablyOnline);
+  });
+
+  return () => unsubscribe();
+}, []);
+
 
   return (
     <>

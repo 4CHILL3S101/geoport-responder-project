@@ -1,7 +1,7 @@
 import {
   FETCH_REPORTS_ROUTES,
   SERVER_IP,
-  SERVER_PORT,
+  SERVER_PORT,WS_SERVER_URL,
   UPDATE_REPORT,
 } from "@env";
 import authapi from "../utils/auth/authapi";
@@ -19,7 +19,7 @@ export default class ReportController {
       }
 
       let token = await user.getIdToken();
-      const url = `ws://${SERVER_IP}:${SERVER_PORT}/${FETCH_REPORTS_ROUTES}?token=${token}`;
+      const url = `${WS_SERVER_URL}/${FETCH_REPORTS_ROUTES}?token=${token}`;
 
       if (!socket || socket.readyState === WebSocket.CLOSED) {
         socket = new WebSocket(url);

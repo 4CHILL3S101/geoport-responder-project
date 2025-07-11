@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  Dimensions,
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -18,7 +17,6 @@ import DisplayResponseModal from "../utils/responseModal";
 import MapboxGL from '@rnmapbox/maps';
 import {MAPBOX_API} from '@env';
 import LoadingModal from "../utils/loadingModal"
-import { set } from "react-hook-form";
 
 MapboxGL.setAccessToken(MAPBOX_API);
 export default function HomePage() {
@@ -80,7 +78,7 @@ export default function HomePage() {
   const confirmLogout = async () => {
     try {
       await auth.signOut();
-      Alert.alert("Logout successful!");
+      Alert.alert("Logout successful!","You have been logged out successfully.");
       navigation.navigate("Loginpage");
     } catch (error) {
       console.error("Error logging out:", error);
