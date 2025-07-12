@@ -96,7 +96,7 @@ export default class ReportController {
 
   filterReports(data) {
     const filteredData = data.filter((report) => {
-      return report.status !== "Solved";
+      return report.status !== "Solved" && report.verifiedStatus !== "unverified";
     });
     return filteredData;
   }
